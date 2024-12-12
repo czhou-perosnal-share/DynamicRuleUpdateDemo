@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using DynamicRuleUpdateDemo;
 
+#region Prepare Data
 
 var contentList = new []
 {
@@ -53,6 +54,8 @@ var ruleList = new[]{
    }
 };
 
+#endregion
+
 var matchedResultDic = new Dictionary<DynamicRule, ICollection<Content>>();
 matchedResultDic.Add(ruleList[0],DynamicRuleResultResolver.GetMatchedContents(ruleList[0], contentList));
 matchedResultDic.Add(ruleList[1],DynamicRuleResultResolver.GetMatchedContents(ruleList[1], contentList));
@@ -65,29 +68,26 @@ matchedResultDic.Add(ruleList[1],DynamicRuleResultResolver.GetMatchedContents(ru
 //Apply the change and save the changes info
 contentList[0].CustomProperty["Language"] = "English";
 var changedPropertyName = "Language";
-var originalValue = "Chinses";
+var originalValue = "Chinese";
 var newValue = "English";
 
 //Find previous matched rule from matchedResultDic
 //Then to validate the content is still matched or not, if not removed from the matched contents
-foreach (var kvp in matchedResultDic.Where(kvp => 
-           kvp.Key.Conditions.ContainsKey(changedPropertyName) 
-        && kvp.Key.Conditions[changedPropertyName] == originalValue))
+foreach (var kvp in matchedResultDic.Where(kvp =>
+            kvp.Key.Conditions.ContainsKey(changedPropertyName)
+            && kvp.Key.Conditions[changedPropertyName] == originalValue))
 {
-    var rule = kvp.Key;
-    var matchedContents = kvp.Value;
-
-    if (matchedContents.Any(content => content.Name == contentList[0].Name))
-    {
-        if (!DynamicRuleResultResolver.IsMatched(contentList[0], rule))
-        {
-            //The content is not matched anymore
-            matchedContents.Remove(contentList[0]);
-        }
-    }
+   var rule = kvp.Key;
+   var matchedContents = kvp.Value;
+   
+   if (!DynamicRuleResultResolver.IsMatched(contentList[0], rule))
+   {
+      //The content is not matched anymore
+      matchedContents.Remove(contentList[0]);
+   }
 }
 
-//Find the possbile new matched rule by the condition with the new value from matchedResultDic
+//Find the possible new matched rule by the condition with the new value from matchedResultDic
 //Then to validate the content is matched or not, if yes added it into the matched contents
 foreach (var kvp in matchedResultDic.Where(kvp => 
                kvp.Key.Conditions.ContainsKey(changedPropertyName) 
