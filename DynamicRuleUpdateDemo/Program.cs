@@ -70,44 +70,38 @@ var newValue = "English";
 
 //Find previous matched rule from matchedResultDic
 //Then to validate the content is still matched or not, if not removed from the matched contents
-foreach (var kvp in matchedResultDic)
+foreach (var kvp in matchedResultDic.Where(kvp => 
+           kvp.Key.Conditions.ContainsKey(changedPropertyName) 
+        && kvp.Key.Conditions[changedPropertyName] == originalValue))
 {
     var rule = kvp.Key;
     var matchedContents = kvp.Value;
 
-    if (rule.Conditions.ContainsKey(changedPropertyName) && rule.Conditions[changedPropertyName] == originalValue)
+    if (matchedContents.Any(content => content.Name == contentList[0].Name))
     {
-        if (matchedContents.Any(content => content.Name == contentList[0].Name))
+        if (!DynamicRuleResultResolver.IsMatched(contentList[0], rule))
         {
-            if (DynamicRuleResultResolver.IsMatched(contentList[0],rule))
-            {
-                //The content is still matched
-                continue;
-            }
-            else
-            {
-                //The content is not matched anymore
-                matchedContents.Remove(contentList[0]);
-            }
+            //The content is not matched anymore
+            matchedContents.Remove(contentList[0]);
         }
     }
 }
 
 //Find the possbile new matched rule by the condition with the new value from matchedResultDic
 //Then to validate the content is matched or not, if yes added it into the matched contents
-foreach (var kvp in matchedResultDic)
+foreach (var kvp in matchedResultDic.Where(kvp => 
+               kvp.Key.Conditions.ContainsKey(changedPropertyName) 
+            && kvp.Key.Conditions[changedPropertyName] == newValue))
 {
     var rule = kvp.Key;
     var matchedContents = kvp.Value;
 
-    if (rule.Conditions.ContainsKey(changedPropertyName) && rule.Conditions[changedPropertyName] == newValue)
+    if (DynamicRuleResultResolver.IsMatched(contentList[0], rule))
     {
-        if (DynamicRuleResultResolver.IsMatched(contentList[0],rule))
-        {
-            //The content is matched
-            matchedContents.Add(contentList[0]);
-        }
+        //The content is matched
+        matchedContents.Add(contentList[0]);
     }
 }
+
 
 
